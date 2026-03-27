@@ -1,0 +1,5 @@
+.env
+upload_log.json
+upload.log
+__pycache__/
+*.pyc
