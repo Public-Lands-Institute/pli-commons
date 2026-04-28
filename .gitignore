@@ -3,3 +3,15 @@ upload_log.json
 upload.log
 __pycache__/
 *.pyc
+
+# Zotero pipeline checkpoints and caches
+needs_regeneration.json
+regen_checkpoint.json
+tag_checkpoint.json
+metadata_cache.json
+regen_errors.log
+SOA_Research_Final.csv
+SOA_Research_Tagged.csv
+
+# macOS
+.DS_Store
