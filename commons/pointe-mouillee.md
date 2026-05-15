@@ -44,7 +44,7 @@ citation_cff: |
 # Pointe Mouillee State Game Area
 ### PLI Learning Object — OER Module
 
-> **License:** CC0 1.0 Universal — No rights reserved. [Full license text](../../LICENSE).
+> **License:** CC0 1.0 Universal — No rights reserved. [Full license text](../LICENSE).
 > **Citation:** Public Lands Institute. *Pointe Mouillee State Game Area — PLI OER Learning Object.* 2026. CC0-1.0. publiclandsinstitute.net
 
 ---
@@ -111,4 +111,4 @@ The contaminated dredge spoil that now constitutes the substrate of Pointe Mouil
 ---
 
 *Source material: Public Lands Institute field photography (black-and-white). publiclandsinstitute.net*
-*License: CC0 1.0 Universal — No rights reserved. See [LICENSE](../../LICENSE).*
+*License: CC0 1.0 Universal — No rights reserved. See [LICENSE](../LICENSE).*

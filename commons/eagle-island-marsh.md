@@ -45,7 +45,7 @@ citation_cff: |
 # Eagle Island Marsh
 ### PLI Learning Object — OER Module
 
-> **License:** CC0 1.0 Universal — No rights reserved. [Full license text](../../LICENSE).
+> **License:** CC0 1.0 Universal — No rights reserved. [Full license text](../LICENSE).
 > **Citation:** Public Lands Institute. *Eagle Island Marsh — PLI OER Learning Object.* 2026. CC0-1.0. publiclandsinstitute.net
 
 ---
@@ -107,4 +107,4 @@ The marsh's ecological condition today is the downstream consequence of that seq
 ---
 
 *Source material: Public Lands Institute field photography (black-and-white). publiclandsinstitute.net*
-*License: CC0 1.0 Universal — No rights reserved. See [LICENSE](../../LICENSE).*
+*License: CC0 1.0 Universal — No rights reserved. See [LICENSE](../LICENSE).*

@@ -46,7 +46,7 @@ citation_cff: |
 # Oak Openings Preserve Metropark
 ### PLI Learning Object — OER Module
 
-> **License:** CC0 1.0 Universal — No rights reserved. [Full license text](../../LICENSE).
+> **License:** CC0 1.0 Universal — No rights reserved. [Full license text](../LICENSE).
 > **Citation:** Public Lands Institute. *Oak Openings Preserve Metropark — PLI OER Learning Object.* 2026. CC0-1.0. publiclandsinstitute.net
 
 ---
@@ -118,4 +118,4 @@ The current restoration program — prescribed burning, invasive removal, pine h
 ---
 
 *Source material: Public Lands Institute field photography (black-and-white). publiclandsinstitute.net*
-*License: CC0 1.0 Universal — No rights reserved. See [LICENSE](../../LICENSE).*
+*License: CC0 1.0 Universal — No rights reserved. See [LICENSE](../LICENSE).*

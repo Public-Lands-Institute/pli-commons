@@ -5,8 +5,8 @@
   "publisher_url": "https://publiclandsinstitute.net",
   "license": "CC0-1.0",
   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-  "schema": "../../schema.json",
-  "citation": "../../CITATION.cff",
+  "schema": "../schema.json",
+  "citation": "../CITATION.cff",
   "series": "Michigan/Ohio Fieldwork — Great Lakes and Oak Openings",
   "description": "OER Learning Object modules documenting industrial-ecological land use history and Indigenous displacement at three Great Lakes and Oak Openings sites. Each module integrates forensic ecological reporting, black-and-white primary source photography analysis, and Shadow History methodology.",
   "learning_objects": [
