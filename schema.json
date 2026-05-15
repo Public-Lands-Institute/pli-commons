@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://publiclandsinstitute.net/schemas/oer-learning-object/v1",
+  "title": "PLI OER Learning Object",
+  "description": "Metadata schema for Public Lands Institute Open Educational Resource modules. Compatible with OER Commons bulk upload and Dublin Core interoperability.",
+  "type": "object",
+  "required": [
+    "title",
+    "slug",
+    "subject",
+    "grade_level",
+    "language",
+    "material_type",
+    "license",
+    "nations",
+    "region",
+    "coordinates",
+    "image_filenames",
+    "ecological_context",
+    "treaty_references"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Full site name as displayed in the learning object."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "URL-safe site identifier. Must match the filename without extension."
+    },
+    "subject": {
+      "type": "string",
+      "enum": [
+        "Environmental Science",
+        "Earth Science",
+        "History",
+        "Indigenous Studies",
+        "Geography",
+        "Ecology"
+      ],
+      "description": "OER Commons subject classification."
+    },
+    "grade_level": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Higher Education",
+          "Graduate/Professional",
+          "Vocational/Professional",
+          "Community College"
+        ]
+      },
+      "description": "Target educational level(s) per OER Commons vocabulary."
+    },
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "ISO 639-1 language code."
+    },
+    "material_type": {
+      "type": "string",
+      "enum": [
+        "Primary Source",
+        "Case Study",
+        "Lesson Plan",
+        "Activity/Lab",
+        "Reference Material"
+      ],
+      "description": "OER Commons material type classification."
+    },
+    "license": {
+      "type": "string",
+      "enum": ["CC0"],
+      "description": "All PLI OER materials are released under CC0 1.0 Universal."
+    },
+    "license_url": {
+      "type": "string",
+      "const": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "nations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Indigenous nations with ancestral and historical ties to the site.",
+      "minItems": 1
+    },
+    "treaty_references": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Treaty names and dates relevant to the site's dispossession history."
+    },
+    "region": {
+      "type": "string",
+      "description": "County and state (e.g., 'Monroe County, Michigan')."
+    },
+    "coordinates": {
+      "type": "string",
+      "pattern": "^-?\\d+\\.\\d+,\\s*-?\\d+\\.\\d+$",
+      "description": "Decimal degrees lat/lon as a comma-separated string."
+    },
+    "ecoregion": {
+      "type": "string",
+      "description": "EPA Level IV ecoregion classification."
+    },
+    "conservation_status": {
+      "type": "string",
+      "description": "Current regulatory or conservation designation."
+    },
+    "biological_stressors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Documented ecological stressors at the site."
+    },
+    "ecological_context": {
+      "type": "string",
+      "description": "Summary of the site's industrial-ecological history and current state."
+    },
+    "image_filenames": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^Public Lands Institute - .+ - \\d{3}\\.tif$"
+      },
+      "description": "PLI archive image filenames associated with this site.",
+      "minItems": 1
+    },
+    "citation_cff": {
+      "type": "string",
+      "description": "Inline CITATION.cff snippet for academic attribution of this specific module."
+    }
+  },
+  "additionalProperties": false
+}

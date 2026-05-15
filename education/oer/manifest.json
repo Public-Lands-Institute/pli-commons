@@ -1,0 +1,102 @@
+{
+  "manifest_version": "1.0.0",
+  "generated": "2026-05-15",
+  "publisher": "Public Lands Institute",
+  "publisher_url": "https://publiclandsinstitute.net",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "schema": "../../schema.json",
+  "citation": "../../CITATION.cff",
+  "series": "Michigan/Ohio Fieldwork — Great Lakes and Oak Openings",
+  "description": "OER Learning Object modules documenting industrial-ecological land use history and Indigenous displacement at three Great Lakes and Oak Openings sites. Each module integrates forensic ecological reporting, black-and-white primary source photography analysis, and Shadow History methodology.",
+  "learning_objects": [
+    {
+      "slug": "eagle-island-marsh",
+      "title": "Eagle Island Marsh",
+      "file": "eagle-island-marsh.md",
+      "region": "Monroe County, Michigan",
+      "coordinates": { "lat": 41.9380, "lon": -83.3420 },
+      "ecoregion": "Erie/Ontario Lake Drift Plains (Ecoregion 8.1.7)",
+      "subject": "Environmental Science",
+      "grade_level": ["Higher Education", "Graduate/Professional"],
+      "language": "en",
+      "material_type": "Primary Source",
+      "nations": ["Potawatomi (Bodéwadmik)", "Wyandot (Wendat)", "Ottawa (Odawa)"],
+      "treaty_references": ["Treaty of Detroit (1807)", "Indian Removal Act (1830)"],
+      "ecological_context": "Corporate-public landscape; historical industrial dumping buffer along Lake Erie shoreline",
+      "biological_stressors": [
+        "Phragmites australis invasion",
+        "Heavy-metal sediment loading",
+        "Nitrogen enrichment from industrial runoff",
+        "Substrate compaction from dredge-fill operations"
+      ],
+      "image_filenames": [
+        "Public Lands Institute - Eagle Island Marsh - 001.tif",
+        "Public Lands Institute - Eagle Island Marsh - 002.tif",
+        "Public Lands Institute - Eagle Island Marsh - 003.tif",
+        "Public Lands Institute - Eagle Island Marsh - 004.tif",
+        "Public Lands Institute - Eagle Island Marsh - 005.tif"
+      ],
+      "site_url": "https://publiclandsinstitute.net/sites/eagle-island-marsh/"
+    },
+    {
+      "slug": "pointe-mouillee",
+      "title": "Pointe Mouillee State Game Area",
+      "file": "pointe-mouillee.md",
+      "region": "Monroe County, Michigan",
+      "coordinates": { "lat": 41.9570, "lon": -83.3040 },
+      "ecoregion": "Erie/Ontario Lake Drift Plains (Ecoregion 8.1.7)",
+      "subject": "Environmental Science",
+      "grade_level": ["Higher Education", "Graduate/Professional"],
+      "language": "en",
+      "material_type": "Primary Source",
+      "nations": ["Potawatomi (Bodéwadmik)", "Wyandot (Wendat)", "Ottawa (Odawa)"],
+      "treaty_references": ["Treaty of Detroit (1807)"],
+      "ecological_context": "Confined Disposal Facility (CDF) constructed from toxic dredge spoils; Detroit River and Lake Erie navigation channel maintenance byproduct",
+      "biological_stressors": [
+        "Phragmites australis monocultures",
+        "PCB and PAH contamination in dredge spoil substrate",
+        "Heavy-metal loading from Detroit River sediments",
+        "Ongoing dredge material placement"
+      ],
+      "image_filenames": [
+        "Public Lands Institute - Pointe Mouillee - 001.tif",
+        "Public Lands Institute - Pointe Mouillee - 002.tif",
+        "Public Lands Institute - Pointe Mouillee - 003.tif",
+        "Public Lands Institute - Pointe Mouillee - 004.tif",
+        "Public Lands Institute - Pointe Mouillee - 005.tif"
+      ],
+      "site_url": "https://publiclandsinstitute.net/sites/pointe-mouillee/"
+    },
+    {
+      "slug": "oak-openings",
+      "title": "Oak Openings Preserve Metropark",
+      "file": "oak-openings.md",
+      "region": "Lucas County, Ohio",
+      "coordinates": { "lat": 41.5670, "lon": -83.8430 },
+      "ecoregion": "Huron/Erie Lake Plains (Ecoregion 8.1.6)",
+      "subject": "Environmental Science",
+      "grade_level": ["Higher Education", "Graduate/Professional"],
+      "language": "en",
+      "material_type": "Primary Source",
+      "nations": ["Ottawa (Odawa)", "Potawatomi (Bodéwadmik)", "Wyandot (Wendat)"],
+      "treaty_references": ["Treaty of Maumee Rapids (1817)", "Treaty of Chicago (1833)"],
+      "ecological_context": "CCC-era Red Pine plantation grids (1930s–1940s) over native oak savanna; reforestation-as-industry documentation; active restoration via prescribed fire and mechanical pine removal",
+      "biological_stressors": [
+        "Red Pine (Pinus resinosa) plantation overstory",
+        "Scots Pine (Pinus sylvestris) invasion",
+        "Carduus and Centaurea spp. in disturbed post-harvest zones",
+        "Fire suppression legacy",
+        "Loss of native understory diversity"
+      ],
+      "image_filenames": [
+        "Public Lands Institute - Oak Openings - 001.tif",
+        "Public Lands Institute - Oak Openings - 002.tif",
+        "Public Lands Institute - Oak Openings - 003.tif",
+        "Public Lands Institute - Oak Openings - 004.tif",
+        "Public Lands Institute - Oak Openings - 005.tif"
+      ],
+      "site_url": "https://publiclandsinstitute.net/sites/oak-openings/"
+    }
+  ]
+}

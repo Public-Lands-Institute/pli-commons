@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: "If you use these materials in published research or educational curricula, please cite them as below."
+type: dataset
+title: "Public Lands Institute — OER Learning Objects: Michigan/Ohio Fieldwork Series"
+abstract: >
+  Open Educational Resource modules documenting industrial-ecological land use history
+  and Indigenous displacement at four Great Lakes and Great Black Swamp sites: Eagle Island
+  Marsh, Pointe Mouillee State Game Area, Howard Marsh Metropark, and Oak Openings Preserve
+  Metropark. Each module integrates forensic ecological reporting with Shadow History
+  methodology, centering Potawatomi, Wyandot, and Ottawa land tenure prior to treaty
+  dispossession. Primary source photography is black-and-white large-format field documentation.
+authors:
+  - name: "Public Lands Institute"
+    website: "https://publiclandsinstitute.net"
+license: CC0-1.0
+license-url: "https://creativecommons.org/publicdomain/zero/1.0/"
+repository: "https://publiclandsinstitute.net/commons"
+date-released: "2026-05-15"
+version: "1.0.0"
+keywords:
+  - environmental science
+  - open educational resources
+  - Indigenous land history
+  - Great Lakes ecology
+  - Great Black Swamp
+  - wetland restoration
+  - Confined Disposal Facility
+  - oak savanna
+  - Shadow History
+  - Potawatomi
+  - Wyandot
+  - Ottawa
+  - primary source photography
+  - OER Commons
+identifiers:
+  - type: url
+    value: "https://publiclandsinstitute.net/sites/eagle-island-marsh/"
+    description: "Eagle Island Marsh site page"
+  - type: url
+    value: "https://publiclandsinstitute.net/sites/pointe-mouillee/"
+    description: "Pointe Mouillee site page"
+  - type: url
+    value: "https://publiclandsinstitute.net/sites/howard-marsh/"
+    description: "Howard Marsh site page"
+  - type: url
+    value: "https://publiclandsinstitute.net/sites/oak-openings/"
+    description: "Oak Openings site page"
+references:
+  - type: generic
+    title: "Treaty of Detroit (1807)"
+    notes: "Ceded Wyandot, Ottawa, Potawatomi, and Ojibwe land claims in southeastern Michigan, including the Lake Erie shoreline."
+  - type: generic
+    title: "Treaty of Maumee Rapids (1817)"
+    notes: "Ceded northwestern Ohio territorial claims of Wyandot, Ottawa, Seneca, and Shawnee nations."
+  - type: generic
+    title: "Treaty of Chicago (1833)"
+    notes: "Ceded Ottawa and Potawatomi claims in northeastern Indiana and northwestern Ohio, including Oak Openings region."
+  - type: generic
+    title: "Indian Removal Act (1830)"
+    notes: "Federal legislation authorizing forced removal of Indigenous nations east of the Mississippi."
