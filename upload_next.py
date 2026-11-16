@@ -12,6 +12,7 @@ import json
 import os
 import re
 import sys
+import time
 import datetime
 import requests
 from pathlib import Path
@@ -29,7 +30,7 @@ IMG_DIR_FULL = PLI_DIR / "img" / "full"
 IMG_DIR_JPG  = PLI_DIR / "img" / "jpg"
 LOG_FILE     = REPO_DIR / "upload_log.json"
 ENV_FILE     = REPO_DIR / ".env"
-INAT_CACHE   = PLI_DIR / "inaturalist_cache.json"
+INAT_CACHE        = PLI_DIR / "inaturalist_cache.json"
 
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 CHUNK_SIZE  = 5 * 1024 * 1024   # 5 MB
@@ -110,13 +111,25 @@ def load_env():
 
 # ── Queue building ────────────────────────────────────────────────────────────
 
-def build_queue(sites):
+def build_queue(sites, log=None):
     """Return ordered list of queue item dicts.
 
     For each site, discovers all image stems in img/full/ (TIF) and img/jpg/ (JPG),
     sorted alphabetically. TIFF is preferred when both exist for the same stem.
-    The Commons filename extension matches the source file.
+
+    Numbers are stable: stems already in the upload log keep their logged number.
+    New stems (not yet logged) receive numbers starting after the highest logged
+    number for that site, so inserting images mid-alphabet never shifts existing
+    numbering or causes duplicate-content conflicts on Commons.
     """
+    # Build stem -> logged commons_filename from prior uploads
+    logged_by_stem: dict[str, str] = {}  # slug/stem -> commons_filename
+    if log:
+        for entry in log:
+            src_stem = Path(entry["source_path"]).stem
+            slug_key = f"{entry.get('slug', '')}:{src_stem}"
+            logged_by_stem[slug_key] = entry["commons_filename"]
+
     queue = []
     for site in sites:
         slug     = site["slug"]
@@ -133,10 +146,26 @@ def build_queue(sites):
                 if p.suffix.lower() == ".tif":
                     stems[p.stem] = p  # TIF overwrites JPG for same stem
 
-        for idx, stem in enumerate(sorted(stems), start=1):
+        # Determine the highest number already assigned for this site
+        import re as _re
+        used_numbers: set[int] = set()
+        for stem in stems:
+            key = f"{slug}:{stem}"
+            if key in logged_by_stem:
+                m = _re.search(r"-\s*(\d{3})\.", logged_by_stem[key])
+                if m:
+                    used_numbers.add(int(m.group(1)))
+        next_new = (max(used_numbers) + 1) if used_numbers else 1
+
+        for stem in sorted(stems):
             src = stems[stem]
             ext = src.suffix.lower()
-            commons_name = f"Public Lands Institute - {site['name']} - {idx:03d}{ext}"
+            key = f"{slug}:{stem}"
+            if key in logged_by_stem:
+                commons_name = logged_by_stem[key]
+            else:
+                commons_name = f"Public Lands Institute - {site['name']} - {next_new:03d}{ext}"
+                next_new += 1
             queue.append({
                 "site": site,
                 "source_path": src,
@@ -159,16 +188,20 @@ def save_log(log):
 # ── EXIF date extraction ──────────────────────────────────────────────────────
 
 def get_image_date(path: Path) -> str:
-    """Return ISO date string from EXIF DateTimeOriginal, or file mtime."""
+    """Return ISO date string from EXIF DateTimeOriginal, or file mtime.
+
+    Uses getexif().get_ifd(0x8769): TiffImageFile has no _getexif(), so the
+    old JPEG-only call silently fell back to mtime (the export date) for every
+    TIFF master. Fixed 2026-11-16 after 384 Commons pages carried wrong dates.
+    """
     try:
-        img = Image.open(path)
-        exif_data = img._getexif()
-        if exif_data:
-            for tag_id, value in exif_data.items():
-                if TAGS.get(tag_id) == "DateTimeOriginal":
-                    return value.split(" ")[0].replace(":", "-")
+        with Image.open(path) as img:
+            value = img.getexif().get_ifd(0x8769).get(36867)  # DateTimeOriginal
+        if value:
+            return str(value).strip().split(" ")[0].replace(":", "-")
     except Exception:
         pass
+    print(f"      WARNING: no EXIF capture date in {path.name}; using file mtime")
     mtime = path.stat().st_mtime
     return datetime.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
 
@@ -270,15 +303,24 @@ def get_file_page_id(session, commons_filename: str):
 
 def set_file_caption(session, csrf_token: str, page_id: int, caption: str):
     """Set the English structured-data caption on a Commons MediaInfo entity."""
-    r = session.post(COMMONS_API, data={
-        "action": "wbeditentity",
-        "id": f"M{page_id}",
-        "data": json.dumps({"labels": {"en": {"language": "en", "value": caption}}}),
-        "summary": "Adding English caption via PLI upload script",
-        "token": csrf_token,
-        "format": "json",
-    })
-    return r.json()
+    for attempt in range(3):
+        try:
+            r = session.post(COMMONS_API, data={
+                "action": "wbeditentity",
+                "id": f"M{page_id}",
+                "data": json.dumps({"labels": {"en": {"language": "en", "value": caption}}}),
+                "summary": "Adding English caption via PLI upload script",
+                "token": csrf_token,
+                "format": "json",
+            })
+            return r.json()
+        except Exception as e:
+            if attempt < 2:
+                print(f"      Caption attempt {attempt+1}/3 failed ({e}), retrying...")
+                time.sleep(10)
+            else:
+                print(f"      Caption failed after 3 attempts — skipping ({e})")
+                return {}
 
 # ── Wikitext construction ─────────────────────────────────────────────────────
 
@@ -329,7 +371,7 @@ def build_wikitext(site, date_str: str, state_category: str,
 |description={{{{en|1={description}}}}}
 |date={date_str}
 |source={{{{own}}}}
-|author=[[User:Publiclandsinstitute|Public Lands Institute]]
+|author=[[User:Pli-tate|Public Lands Institute]]
 |permission=
 |other versions=
 }}}}
@@ -401,11 +443,35 @@ def _upload_chunked(session, csrf_token, commons_filename, source_path, wikitext
             }
             if filekey:
                 data["filekey"] = filekey
-            r = session.post(COMMONS_API, data=data,
-                             files={"chunk": (commons_filename, chunk, mime)})
-            result = r.json()
-            if "error" in result:
-                sys.exit(f"ERROR: Chunk {chunk_num} upload failed — {json.dumps(result, indent=2)}")
+            for attempt in range(5):
+                try:
+                    r = session.post(COMMONS_API, data=data,
+                                     files={"chunk": (commons_filename, chunk, mime)},
+                                     timeout=120)
+                except requests.exceptions.RequestException as e:
+                    if attempt < 4:
+                        print(f"        chunk {chunk_num + 1} connection error (attempt {attempt + 1}/5): {e} — retrying in 20s...")
+                        time.sleep(20)
+                        continue
+                    else:
+                        sys.exit(f"ERROR: Chunk {chunk_num + 1} connection failed after 5 attempts: {e}")
+                try:
+                    result = r.json()
+                except ValueError:
+                    if attempt < 4:
+                        print(f"        chunk {chunk_num + 1} bad response (attempt {attempt + 1}/5), retrying in 20s...")
+                        print(f"        HTTP {r.status_code}: {r.text[:120]!r}")
+                        time.sleep(20)
+                        continue
+                    else:
+                        sys.exit(f"ERROR: Chunk {chunk_num + 1} got non-JSON after 5 attempts. HTTP {r.status_code}: {r.text[:200]!r}")
+                if "error" not in result:
+                    break
+                if attempt < 4:
+                    print(f"        chunk {chunk_num + 1} error (attempt {attempt + 1}/5), retrying in 20s...")
+                    time.sleep(20)
+                else:
+                    sys.exit(f"ERROR: Chunk {chunk_num + 1} upload failed — {json.dumps(result, indent=2)}")
             upload = result.get("upload", {})
             filekey = upload.get("filekey", filekey)
             offset += len(chunk)
@@ -422,8 +488,26 @@ def _upload_chunked(session, csrf_token, commons_filename, source_path, wikitext
         "token": csrf_token,
         "format": "json",
     }
-    r = session.post(COMMONS_API, data=finalize_data)
-    result = r.json()
+    _TRANSIENT_ERRORS = {"backend-fail-internal", "backend-fail-connect", "backend-fail-readonly"}
+    for attempt in range(3):
+        try:
+            r = session.post(COMMONS_API, data=finalize_data, timeout=120)
+            result = r.json()
+        except (requests.exceptions.RequestException, ValueError) as e:
+            if attempt < 2:
+                print(f"        finalize connection error (attempt {attempt + 1}/3): {e} — retrying in 20s...")
+                time.sleep(20)
+                continue
+            else:
+                sys.exit(f"ERROR: Finalize failed after 3 attempts: {e}")
+        http_code = result.get("httpCode")
+        error_code = result.get("error", {}).get("code", "")
+        if http_code in (502, 503, 504) or error_code in _TRANSIENT_ERRORS:
+            if attempt < 2:
+                print(f"        finalize error ({error_code or http_code}, attempt {attempt + 1}/3), retrying in 20s...")
+                time.sleep(20)
+                continue
+        break
     # If the only warnings are non-content ones (deleted file, existing file),
     # retry with ignorewarnings so the full assembled file is committed.
     upload = result.get("upload", {})
@@ -494,6 +578,18 @@ def main():
 
     edit_mode            = "--edit-existing"      in sys.argv
     deletion_mode        = "--request-deletion"   in sys.argv
+
+    # Optional --site <slug> filter
+    site_filter = None
+    if "--site" in sys.argv:
+        idx = sys.argv.index("--site")
+        if idx + 1 >= len(sys.argv):
+            sys.exit("ERROR: --site requires a slug argument")
+        site_filter = sys.argv[idx + 1]
+        valid_slugs = {s["slug"] for s in sites}
+        if site_filter not in valid_slugs:
+            sys.exit(f"ERROR: unknown site slug {site_filter!r}. Valid slugs:\n  " +
+                     "\n  ".join(sorted(valid_slugs)))
 
     # ── Request deletion of all logged files ─────────────────────────────────
     if deletion_mode:
@@ -583,12 +679,13 @@ def main():
         return
 
     # ── Upload next batch ─────────────────────────────────────────────────────
-    queue = build_queue(sites)
+    log = load_log()
+    filtered_sites = [s for s in sites if s["slug"] == site_filter] if site_filter else sites
+    queue = build_queue(filtered_sites, log=log)
     if not queue:
         print("No images found in PLI image directory.")
         return
 
-    log = load_log()
     skip_filenames = {entry["commons_filename"] for entry in log}
     pending = [item for item in queue if item["commons_filename"] not in skip_filenames]
 
@@ -599,13 +696,14 @@ def main():
     session, csrf_token = make_session(login_username, password)
     cache: dict[str, tuple] = {}
 
+    batch_size = len(pending) if site_filter else 5
     uploaded_count = 0
-    for item in pending[:5]:
+    for item in pending[:batch_size]:
         site             = item["site"]
         source_path      = item["source_path"]
         commons_filename = item["commons_filename"]
 
-        print(f"\n[{uploaded_count+1}/5] Uploading: {commons_filename}")
+        print(f"\n[{uploaded_count+1}/{batch_size}] Uploading: {commons_filename}")
         print(f"      Source: {source_path}")
 
         # Skip if already on Commons (e.g. uploaded but not logged due to prior crash)
@@ -645,13 +743,17 @@ def main():
         warnings = set(upload_result.get("warnings", {}).keys())
         error_code = response.get("error", {}).get("code", "")
         nochange = (
-            (upload_result.get("result") == "Warning" and warnings <= {"exists", "nochange"})
+            (upload_result.get("result") == "Warning" and warnings <= {"exists", "nochange", "duplicate"})
             or error_code == "fileexists-no-change"
         )
         if upload_result.get("result") != "Success" and not nochange:
             sys.exit(f"ERROR: Upload failed — {json.dumps(response, indent=2)}")
         if nochange:
-            print(f"      Already on Commons (nochange) — logging and continuing.")
+            dup_of = upload_result.get("warnings", {}).get("duplicate", [])
+            if dup_of:
+                print(f"      Duplicate of {dup_of[0]} — logging and continuing.")
+            else:
+                print(f"      Already on Commons (nochange) — logging and continuing.")
 
         encoded     = commons_filename.replace(" ", "_")
         commons_url = f"https://commons.wikimedia.org/wiki/File:{encoded}"
@@ -674,7 +776,8 @@ def main():
         print(f"      Done:   {commons_url}")
         uploaded_count += 1
 
-    print(f"\nUploaded {uploaded_count} image(s). {len(pending) - uploaded_count} remaining.")
+    remaining = len(pending) - uploaded_count
+    print(f"\nUploaded {uploaded_count} image(s). {remaining} remaining.")
 
 if __name__ == "__main__":
     main()
