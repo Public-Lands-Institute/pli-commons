@@ -33,6 +33,10 @@ ENV_FILE     = REPO_DIR / ".env"
 INAT_CACHE        = PLI_DIR / "inaturalist_cache.json"
 
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+PLI_SITE_PAGE = "https://publiclandsinstitute.net/sites/{slug}.html"
+# Hidden tracking category on every PLI file (category page text, marked
+# __HIDDENCAT__, is in linkback/Category_Public_Lands_Institute.wikitext)
+TRACKING_CATEGORY = "Public Lands Institute"
 CHUNK_SIZE  = 5 * 1024 * 1024   # 5 MB
 LARGE_FILE  = 10 * 1024 * 1024  # chunked upload threshold
 
@@ -324,6 +328,14 @@ def set_file_caption(session, csrf_token: str, page_id: int, caption: str):
 
 # ── Wikitext construction ─────────────────────────────────────────────────────
 
+def site_page_line(site) -> str:
+    """Link-back line to the site's PLI page, appended to the description.
+    make_linkback_wikitext.py writes the same line for files already on Commons."""
+    state = STATE_NAMES.get(site["state"], site["state"])
+    url = PLI_SITE_PAGE.format(slug=site["slug"])
+    return f"Public Lands Institute site record: [{url} {site['name']}, {state}]"
+
+
 def build_wikitext(site, date_str: str, state_category: str,
                    site_category: str, ecology_categories: list[str],
                    native_lands: str = "", inat_species: list = None) -> str:
@@ -354,12 +366,12 @@ def build_wikitext(site, date_str: str, state_category: str,
     if inat_species:
         parts.append(f"Notable species observed: {', '.join(inat_species)}.")
 
-    description = " ".join(parts)
+    description = " ".join(parts) + "<br />" + site_page_line(site)
 
     location_line = f"{{{{Location|{lat}|{lng}}}}}" if lat and lng else ""
 
     categories = [
-        "Public Lands Institute",
+        TRACKING_CATEGORY,
         "Public lands of the United States",
         state_category,
         site_category,
@@ -513,7 +525,7 @@ def _upload_chunked(session, csrf_token, commons_filename, source_path, wikitext
     upload = result.get("upload", {})
     if upload.get("result") == "Warning":
         warnings = set(upload.get("warnings", {}).keys())
-        if warnings <= {"was-deleted", "exists", "badfilename", "duplicate-archive", "nochange"}:
+        if warnings <= {"was-deleted", "exists", "exists-normalized", "badfilename", "duplicate-archive", "nochange"}:
             finalize_data["ignorewarnings"] = "1"
             r = session.post(COMMONS_API, data=finalize_data)
             result = r.json()
